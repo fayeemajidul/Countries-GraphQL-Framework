@@ -4,6 +4,7 @@
 export const state = {
   launches: [],
   countries: [],
+  continents: [],
   byCode: {},
   launchedCodes: new Set(),
   score: 0,

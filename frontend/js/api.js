@@ -15,6 +15,12 @@ export const COUNTRIES_QUERY = `query{countries{ code name emoji capital currenc
 
 export const COUNTRY_QUERY = `query($code:ID!){country(code:$code){ code name emoji capital currency continent{name} languages{name} }}`;
 
+// Continent → countries → currency chain — exactly the schema traversal used
+// by the "which country in <continent> uses <currency>" question type.
+export const CONTINENTS_QUERY = `query{continents{ code name countries{ code name emoji capital currency } }}`;
+
+export const CONTINENT_QUERY = `query($code:ID!){continent(code:$code){ code name countries{ code name emoji capital currency } }}`;
+
 async function gqlFetch(url, query, variables = {}, timeoutMs = 9000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);

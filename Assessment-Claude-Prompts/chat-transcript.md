@@ -74,3 +74,7 @@
 ### 17
 
 > I just want my transcripts remove claude transcripts also why the design-source
+
+### 18
+
+> I want the questions to test the graphql endpoints so create some questions related to querying certain information from specific countries , for example ask the user specific questions related to  currency inorder to get the answer we can Query Continents -> countires -> currency randomize questions but user graphql to pull all information

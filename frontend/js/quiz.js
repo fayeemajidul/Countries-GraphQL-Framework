@@ -1,26 +1,33 @@
 import { state } from './state.js';
-import { $, setText, fmtDate, shuffle, escapeHtml, resolveIso, setBanner } from './utils.js';
-import { fetchSpacex, fetchCountries, SPACEX_QUERY, COUNTRIES_QUERY, COUNTRY_QUERY } from './api.js';
+import { $, setText, escapeHtml, setBanner } from './utils.js';
+import {
+  fetchSpacex, fetchCountries,
+  SPACEX_QUERY, COUNTRIES_QUERY, CONTINENTS_QUERY, COUNTRY_QUERY,
+} from './api.js';
 import { renderAtlas } from './atlas.js';
 import { toast } from './toasts.js';
+import { pickQuestion } from './questions.js';
+import { resolveIso } from './utils.js';
 
 export async function boot() {
   setBanner(null);
   setText('apiStatusTop', 'Connecting');
   try {
-    const [cData, sData] = await Promise.all([
+    const [cData, contData, sData] = await Promise.all([
       fetchCountries(COUNTRIES_QUERY),
+      fetchCountries(CONTINENTS_QUERY),
       fetchSpacex(SPACEX_QUERY, { limit: 100 }),
     ]);
     state.countries = (cData?.countries || []).filter(c => c && c.name);
     state.byCode = Object.fromEntries(state.countries.map(c => [c.code, c]));
+    state.continents = (contData?.continents || []).filter(c => c && c.name);
     state.launches = (sData?.launchesPast || []).filter(L => {
       const code = resolveIso(L?.rocket?.rocket?.country);
       if (code) state.launchedCodes.add(code);
       return !!code;
     });
-    if (!state.launches.length) throw new Error('No mappable launches.');
-    setText('apiStatusTop', `${state.launches.length} launches indexed`);
+    if (!state.countries.length) throw new Error('No countries returned.');
+    setText('apiStatusTop', `${state.countries.length} countries · ${state.launches.length} launches`);
     setText('atlasTotal', state.countries.length);
     renderAtlas();
     nextRound();
@@ -39,34 +46,41 @@ export function nextRound() {
   $('skipBtn').disabled = false;
   $('skipBtn').classList.remove('hidden');
 
-  const recent = new Set(state.history.slice(-10).map(h => h.mission));
-  const pool = state.launches.filter(L => !recent.has(L.mission_name));
-  const launch = (pool.length ? pool : state.launches)[Math.floor(Math.random() * (pool.length || state.launches.length))];
-  const code = resolveIso(launch?.rocket?.rocket?.country);
-  const correct = state.byCode[code];
-  if (!correct) {
-    state.launches = state.launches.filter(L => L !== launch);
-    return nextRound();
+  const q = pickQuestion();
+  if (!q) {
+    setBanner('Not enough data loaded to generate a question.', 'Retry');
+    return;
   }
+  state.current = q;
 
-  const sameCont = state.countries.filter(c => c.code !== correct.code && c.continent?.name === correct.continent?.name);
-  const others = state.countries.filter(c => c.code !== correct.code);
-  const distractors = shuffle([...shuffle(sameCont).slice(0, 2), ...shuffle(others).slice(0, 4)])
-    .filter((c, i, arr) => arr.findIndex(x => x.code === c.code) === i).slice(0, 3);
-  const options = shuffle([correct, ...distractors]);
-  state.current = { launch, country: correct, correctCode: correct.code, options };
-
-  const dateStr = fmtDate(launch.launch_date_utc);
-  const siteStr = launch.launch_site?.site_name_long || launch.launch_site?.site_name || '—';
   setText('launchIdx', String(state.asked + 1).padStart(3, '0'));
-  setText('missionName', launch.mission_name || 'Untitled');
-  setText('rocketName', launch.rocket?.rocket_name || '—');
-  setText('launchDate', dateStr);
-  setText('launchSite', siteStr);
-  setText('quizMission', launch.mission_name || 'Untitled');
-  setText('quizMeta', `${launch.rocket?.rocket_name || '—'} · ${dateStr} · ${siteStr}`);
-  setText('revealFrom', `${launch.mission_name || ''} · ${launch.rocket?.rocket_name || ''}`);
-  paintReveal(correct);
+  setText('questionTag', formatTypeTag(q.type));
+  setText('queryLabel', q.queryLabel || '');
+
+  $('questionPromptIdle').innerHTML = q.promptHTML;
+  $('questionMetaIdle').innerHTML = q.metaHTML || '';
+  $('questionPromptAsk').innerHTML = q.promptHTML;
+  $('questionMetaAsk').textContent = stripTags(q.promptHTML).slice(0, 80);
+
+  setText('revealFrom', q.revealContext || '');
+  paintReveal(q.revealCountry);
+}
+
+function formatTypeTag(type) {
+  const map = {
+    'spacex-country':     'Question · SpaceX origin',
+    'country-currency':   'Question · Currency',
+    'country-capital':    'Question · Capital',
+    'country-continent':  'Question · Continent',
+    'continent-currency': 'Question · Continent → Currency',
+  };
+  return map[type] || 'Question';
+}
+
+function stripTags(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || '';
 }
 
 export function openQuiz() {
@@ -79,27 +93,28 @@ export function openQuiz() {
 function renderOptions(options) {
   const wrap = $('options');
   wrap.innerHTML = '';
-  options.forEach((c, i) => {
+  options.forEach((opt, i) => {
     const btn = document.createElement('button');
     btn.className = 'opt text-left px-4 py-3 flex items-center gap-3 w-full';
-    btn.dataset.code = c.code;
+    btn.dataset.key = opt.key;
     btn.innerHTML = `
       <span class="key">${String.fromCharCode(65 + i)}</span>
-      <span class="flex-1 truncate text-sm">${escapeHtml(c.name)}</span>
+      <span class="flex-1 truncate text-sm">${escapeHtml(opt.label)}</span>
       <span class="badge badge-success badge-correct">✓ Correct</span>
       <span class="badge badge-destructive badge-wrong">✗ Wrong</span>`;
-    btn.addEventListener('click', (e) => { e.stopPropagation(); onAnswer(c.code, btn); });
+    btn.addEventListener('click', (e) => { e.stopPropagation(); onAnswer(opt.key, btn); });
     wrap.appendChild(btn);
   });
 }
 
-async function onAnswer(code, btn) {
+async function onAnswer(key, btn) {
   if (state.locked) return;
   state.locked = true;
-  const correct = state.current.correctCode;
-  const ok = code === correct;
+  const q = state.current;
+  const correct = q.correctKey;
+  const ok = key === correct;
   document.querySelectorAll('#options .opt').forEach(el => {
-    if (el.dataset.code === correct) el.dataset.result = ok ? 'correct' : 'reveal';
+    if (el.dataset.key === correct) el.dataset.result = ok ? 'correct' : 'reveal';
     else if (el === btn && !ok) el.dataset.result = 'wrong';
     else el.dataset.result = 'dim';
     el.disabled = true;
@@ -111,11 +126,11 @@ async function onAnswer(code, btn) {
   setText('streak', state.streak);
   setText('verdict', ok ? 'Correct' : 'Incorrect');
 
-  const country = state.current.country;
+  const correctOpt = q.options.find(o => o.key === correct);
   toast(
     ok ? 'success' : 'destructive',
     ok ? 'Correct' : 'Incorrect',
-    ok ? `${country.emoji || ''} ${country.name}` : `Answer: ${country.emoji || ''} ${country.name}`
+    ok ? `${q.revealCountry?.emoji || ''} ${correctOpt?.label || ''}` : `Answer: ${correctOpt?.label || ''}`,
   );
 
   setTimeout(() => {
@@ -123,12 +138,21 @@ async function onAnswer(code, btn) {
     $('card').classList.add('flipped');
   }, 700);
 
-  try {
-    const d = await fetchCountries(COUNTRY_QUERY, { code: country.code });
-    if (d?.country) paintReveal(d.country);
-  } catch (_) { /* keep initial paint */ }
+  // Refetch the reveal country for freshness — demonstrates a live country(code) call.
+  if (q.revealCountry?.code) {
+    try {
+      const d = await fetchCountries(COUNTRY_QUERY, { code: q.revealCountry.code });
+      if (d?.country) paintReveal(d.country);
+    } catch (_) { /* keep initial paint */ }
+  }
 
-  state.history.push({ mission: state.current.launch.mission_name, ok, code: country.code, country: country.name });
+  state.history.push({
+    type: q.type,
+    ok,
+    code: q.revealCountry?.code,
+    country: q.revealCountry?.name,
+    mission: q.payload?.mission,
+  });
   renderAtlas();
 
   $('skipBtn').classList.add('hidden');
@@ -137,6 +161,7 @@ async function onAnswer(code, btn) {
 }
 
 export function paintReveal(c) {
+  if (!c) return;
   $('flag').textContent = c.emoji || '🏳️';
   setText('revealCountry', c.name || '—');
   setText('revealCapital', c.capital || '—');
