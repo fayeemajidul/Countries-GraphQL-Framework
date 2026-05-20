@@ -1,0 +1,9 @@
+{
+  "name": "countries-graphql-framework",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  }
+}
