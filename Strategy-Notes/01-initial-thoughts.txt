@@ -1,0 +1,48 @@
+# Strategy Notes — Initial Thoughts (Template)
+
+**Date:** 2026-05-20
+**Author:** Fayeem Mooktadeer
+**Status:** Draft — unrevised, to be revisited
+
+---
+
+## My First Thoughts (verbatim, unrevised)
+
+> What I want to tackle first is the critical features to the user. My first thought process is to test endpoints and review the endpoint documentation. This will help us gauge and understand how important our endpoints are to the user.
+
+---
+
+## Template — To Fill In Later
+
+### Critical Features to the User
+- _(list features that matter most to the end user of the Countries GraphQL API)_
+- 
+- 
+
+### Endpoints to Test First
+- _(prioritized list — which endpoints / queries to hit first)_
+- 
+- 
+
+### Documentation Review Notes
+- _(what the schema docs / API docs tell us about importance, contracts, nullability)_
+- 
+- 
+
+### Risk / Importance Ranking
+- _(map each endpoint to: how critical is it? what breaks if it fails?)_
+- 
+- 
+
+### Open Questions
+- _(things to clarify before committing to a strategy)_
+- 
+- 
+
+---
+
+## Next Step (per user)
+Use these findings to add detail onto the JIRA tickets already created:
+- [RECREW-147](https://recrewit-ai.atlassian.net/browse/RECREW-147) — Manually test Countries GraphQL API endpoints
+- [RECREW-148](https://recrewit-ai.atlassian.net/browse/RECREW-148) — Connect repo to JIRA
+- EPIC: [RECREW-146](https://recrewit-ai.atlassian.net/browse/RECREW-146)
