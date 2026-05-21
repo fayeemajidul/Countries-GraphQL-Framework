@@ -5,8 +5,6 @@
 // fail over if an upstream mirror is down.
 
 const SPACEX_ENDPOINTS = [
-  'https://spacex-production.up.railway.app/',
-  'https://main--spacex-l4uc6p.apollographos.net/graphql',
   'https://spacex-api.fly.dev/graphql',
 ];
 

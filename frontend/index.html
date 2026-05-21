@@ -3,431 +3,283 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ContinuedX</title>
+<title>ContinuedX — Rocketship Catalog</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  /* shadcn-inspired tokens (dark / zinc) */
-  :root{
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 5%;
-    --card-elevated: 240 6% 8%;
-    --border: 240 3.7% 15.9%;
-    --border-strong: 240 3.7% 22%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --ring: 240 4.9% 83.9%;
-    --success: 142 70% 45%;
-    --success-fg: 142 70% 90%;
-    --destructive: 0 72% 51%;
-    --destructive-fg: 0 86% 90%;
-    --radius: 10px;
-
-    --bg: hsl(var(--background));
-    --ink: hsl(var(--foreground));
-    --mute: hsl(var(--muted-foreground));
-    --line: hsl(var(--border));
-    --line-2: hsl(var(--border-strong));
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          background: 'hsl(var(--background))',
+          foreground: 'hsl(var(--foreground))',
+          card: 'hsl(var(--card))',
+          'card-elevated': 'hsl(var(--card-elevated))',
+          border: 'hsl(var(--border))',
+          muted: 'hsl(var(--muted))',
+          'muted-foreground': 'hsl(var(--muted-foreground))',
+          accent: 'hsl(var(--accent))',
+          ring: 'hsl(var(--ring))',
+        }
+      }
+    }
   }
-  html,body{ background:var(--bg); color:var(--ink); font-family:'Inter', system-ui, sans-serif; -webkit-font-smoothing:antialiased;}
+</script>
+<style>
+  :root{
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --card-elevated: 0 0% 8%;
+    --border: 0 0% 16%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 48 100% 60%;     /* yellow */
+    --ring: 48 96% 53%;
+    --success: 142 71% 45%;
+
+    --ink:#fff;
+    --mute: hsl(0 0% 48%);
+    --line: hsl(0 0% 13%);
+    --line-2: hsl(0 0% 18%);
+  }
+  html,body{ background: hsl(var(--background)); color: hsl(var(--foreground)); font-family:'Inter', system-ui, sans-serif;}
   .serif{ font-family:'Instrument Serif', Georgia, serif; letter-spacing:-.01em;}
   .mono{ font-family:'JetBrains Mono', ui-monospace, monospace;}
-  ::selection{ background:#fff; color:#000;}
+  ::selection{ background: hsl(var(--accent)); color:#000;}
 
-  /* Flashcard — physical card with 3D flip */
-  .card-wrap{ perspective: 1800px; }
-  .card{
-    position:relative;
-    transform-style: preserve-3d;
-    transition: transform .7s cubic-bezier(.2,.7,.2,1);
-    min-height: clamp(380px, 60vh, 520px);
-    will-change: transform;
-  }
-  .card.flipped{ transform: rotateY(180deg); }
-  /* Two physical faces */
-  .face{
-    position:absolute; inset:0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+  /* Product card */
+  .product{
     background: hsl(var(--card));
     border:1px solid hsl(var(--border));
-    border-radius: var(--radius);
-    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 10px;
+    overflow:hidden;
+    transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
     display:flex; flex-direction:column;
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.04) inset,
-      0 18px 40px -16px rgba(0,0,0,.85),
-      0 40px 80px -30px rgba(0,0,0,.6);
+  }
+  .product:hover{
+    border-color: hsl(var(--ring) / .55);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px -20px rgba(0,0,0,.7), 0 0 0 1px hsl(var(--ring) / .25);
+  }
+  .product-img{
+    aspect-ratio: 4/3;
+    background:
+      radial-gradient(120% 80% at 50% 0%, hsl(0 0% 10%) 0%, hsl(0 0% 6%) 60%, hsl(0 0% 4%) 100%);
+    position:relative;
+    border-bottom:1px solid hsl(var(--border));
     overflow:hidden;
   }
-  .face .corner{
-    position:absolute; top:.9rem; right:1rem;
-    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:.18em;
-    text-transform:uppercase; color:hsl(var(--muted-foreground));
+  .product-img::after{
+    content:''; position:absolute; inset:0; pointer-events:none; opacity:.18;
+    background-image:
+      linear-gradient(to right, hsl(0 0% 100% / .04) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(0 0% 100% / .04) 1px, transparent 1px);
+    background-size: 28px 28px;
   }
-  .face .punch{
-    position:absolute; top:1.1rem; left:1.1rem; width:8px; height:8px;
-    border-radius:50%; background:hsl(var(--background)); box-shadow: inset 0 1px 2px rgba(0,0,0,.9), 0 0 0 1px hsl(var(--border));
-  }
+  .product-img svg{ position:absolute; inset:0; margin:auto; }
 
-  .face-back{ transform: rotateY(180deg); }
-  .card-wrap[data-state="idle"] .card{ cursor:pointer; }
-  .card-wrap[data-state="idle"]:hover .card{ transform: rotateX(2deg) translateY(-2px); }
-  .card-wrap[data-state="idle"]:hover .face-front{ border-color:hsl(var(--border-strong)); }
-
-  .front-idle, .front-asking { display:none; }
-  .card-wrap[data-state="idle"]    .front-idle  { display:flex; flex-direction:column; flex:1; min-height:0; }
-  .card-wrap[data-state="asking"]  .front-asking{ display:flex; flex-direction:column; flex:1; min-height:0; }
-
-  /* Options — shadcn-y rounded cards */
-  .opt{
-    position:relative;
-    border:1px solid hsl(var(--border));
-    background: hsl(var(--card-elevated));
-    border-radius: 8px;
-    transition: border-color .15s ease, background .15s ease, opacity .15s ease, transform .12s ease;
-  }
-  .opt:hover:not(:disabled){ border-color: hsl(var(--ring) / .35); background: hsl(var(--muted) / .4); }
-  .opt:focus-visible{ outline:none; box-shadow: 0 0 0 2px hsl(var(--ring) / .35); }
-  /* Validation states */
-  .opt[data-result="correct"]{
-    border-color: hsl(var(--success) / .55);
-    background: hsl(var(--success) / .08);
-  }
-  .opt[data-result="reveal"]{
-    border-color: hsl(var(--success) / .55);
-    background: hsl(var(--success) / .04);
-  }
-  .opt[data-result="wrong"]{
-    border-color: hsl(var(--destructive) / .55);
-    background: hsl(var(--destructive) / .08);
-  }
-  .opt[data-result="dim"]{ opacity:.4;}
-  .opt .badge-correct, .opt .badge-wrong{ display:none;}
-  .opt[data-result="correct"] .badge-correct,
-  .opt[data-result="reveal"]  .badge-correct{ display:inline-flex;}
-  .opt[data-result="wrong"]   .badge-wrong{ display:inline-flex;}
-
-  /* Badge */
+  /* Badges */
   .badge{
-    display:inline-flex; align-items:center; gap:.3rem;
     font-family:'JetBrains Mono', monospace; font-size:10px;
-    padding:2px 7px; border-radius:9999px; line-height:1;
-    border:1px solid currentColor;
-    letter-spacing:.06em;
+    letter-spacing:.12em; text-transform:uppercase;
+    padding: .25rem .5rem;
+    border-radius: 3px;
   }
-  .badge-success{ color: hsl(var(--success-fg)); background: hsl(var(--success) / .18); border-color: hsl(var(--success) / .55);}
-  .badge-destructive{ color: hsl(var(--destructive-fg)); background: hsl(var(--destructive) / .18); border-color: hsl(var(--destructive) / .55);}
-  .badge-muted{ color: hsl(var(--muted-foreground)); border-color: hsl(var(--border));}
+  .badge-sponsor{ background: hsl(var(--muted)); color: hsl(var(--muted-foreground));}
+  .badge-best{ background: hsl(var(--accent)); color:#000;}
 
-  .key{
-    font-family:'JetBrains Mono', monospace; font-size:11px;
-    border:1px solid hsl(var(--border)); padding:1px 6px; border-radius:4px;
-    color: hsl(var(--muted-foreground));
-  }
-  .opt[data-result="correct"] .key,
-  .opt[data-result="reveal"] .key{ color: hsl(var(--success-fg)); border-color: hsl(var(--success) / .55);}
-  .opt[data-result="wrong"] .key{ color: hsl(var(--destructive-fg)); border-color: hsl(var(--destructive) / .55);}
-
-  /* Buttons — shadcn variants */
+  /* Buttons */
   .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:.4rem;
-    border-radius: 8px; padding:.55rem .9rem; font-size:13px; font-weight:500;
-    border:1px solid hsl(var(--border));
-    background: hsl(var(--foreground)); color: hsl(var(--background));
+    border:1px solid hsl(var(--border)); color: hsl(var(--foreground));
+    background: hsl(var(--card-elevated));
+    padding:.55rem 1rem; font-size:13px; font-weight:500;
+    border-radius: 999px;
     transition: opacity .15s ease, background .15s ease, border-color .15s ease;
+    cursor:pointer;
   }
-  .btn:hover{ opacity:.9;}
-  .btn-outline{ background: transparent; color: hsl(var(--foreground)); border-color: hsl(var(--border-strong));}
-  .btn-outline:hover{ background: hsl(var(--muted) / .4);}
-  .btn-ghost{ background: transparent; color: hsl(var(--muted-foreground)); border-color: transparent;}
-  .btn-ghost:hover{ background: hsl(var(--muted) / .4); color: hsl(var(--foreground));}
+  .btn:hover{ background: hsl(var(--muted));}
+  .btn:disabled{ opacity:.5; cursor: not-allowed;}
+  .btn-cart{
+    background: hsl(var(--accent)); color:#000;
+    border-color: hsl(var(--accent));
+    font-weight: 600;
+  }
+  .btn-cart:hover{ filter: brightness(1.05);}
+  .btn-ghost{ background: transparent; border-color: hsl(var(--border)); color: hsl(var(--muted-foreground));}
+  .btn-ghost:hover{ color: hsl(var(--foreground)); border-color: hsl(var(--ring) / .5); background: transparent;}
 
-  .skel{ background: linear-gradient(90deg, hsl(var(--muted) / .3), hsl(var(--muted) / .55), hsl(var(--muted) / .3)); background-size:200% 100%; animation: shimmer 1.4s infinite; border-radius:6px;}
+  /* Skeleton */
+  .skel{ background: linear-gradient(90deg, hsl(0 0% 8%), hsl(0 0% 12%), hsl(0 0% 8%)); background-size:200% 100%; animation: shimmer 1.4s infinite; border-radius:6px;}
   @keyframes shimmer{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-  .input{
-    background: hsl(var(--card-elevated)); border:1px solid hsl(var(--border));
-    color: hsl(var(--foreground)); padding:.55rem .75rem; border-radius:8px;
-    font-family:'JetBrains Mono', monospace; font-size:13px; width:100%;
-  }
-  .input::placeholder{ color: hsl(var(--muted-foreground) / .8);}
-  .input:focus{ outline:none; border-color: hsl(var(--ring) / .5); box-shadow: 0 0 0 2px hsl(var(--ring) / .15);}
+  .pop{ animation: pop .3s ease-out;}
+  @keyframes pop{ from{opacity:0; transform: translateY(4px);} to{ opacity:1; transform:none;} }
 
-  .f{
-    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:.08em;
-    color: hsl(var(--muted-foreground)); padding:.35rem .65rem; text-transform:uppercase;
-    border:1px solid transparent; border-radius:9999px;
-    transition: color .15s, background .15s, border-color .15s;
+  /* Data-source attribution highlight */
+  .glow-token{
+    color:#fde047;
+    text-shadow: 0 0 12px rgba(253,224,71,.35);
   }
-  .f:hover{ color: hsl(var(--foreground)); background: hsl(var(--muted) / .35);}
-  .f[aria-pressed="true"]{ color: hsl(var(--foreground)); background: hsl(var(--muted) / .55); border-color: hsl(var(--border-strong));}
 
-  details > summary{ list-style:none; cursor:pointer;}
-  details > summary::-webkit-details-marker{ display:none;}
-  .row{ border-top:1px solid hsl(var(--border));}
-  .row:hover{ background: hsl(var(--muted) / .25);}
-  details[open] .caret{ transform: rotate(45deg);}
-  .caret{ display:inline-block; transition: transform .15s ease; color:hsl(var(--muted-foreground));}
+  /* Sticky header */
+  .header-bar{
+    position: sticky; top: 0; z-index: 30;
+    background: hsl(var(--background) / .85);
+    backdrop-filter: blur(12px);
+  }
 
   /* Toast */
-  .toast-region{ position:fixed; top:1rem; right:1rem; z-index:50; display:flex; flex-direction:column; gap:.5rem; pointer-events:none;}
   .toast{
-    pointer-events:auto;
-    min-width: 280px; max-width: 360px;
-    background: hsl(var(--card)); border:1px solid hsl(var(--border));
-    border-radius: 10px; padding: .75rem .9rem;
-    box-shadow: 0 10px 30px -10px rgba(0,0,0,.6);
-    display:flex; gap:.7rem; align-items:flex-start;
-    animation: toastIn .25s ease-out;
-  }
-  .toast[data-variant="success"]{ border-color: hsl(var(--success) / .5); }
-  .toast[data-variant="destructive"]{ border-color: hsl(var(--destructive) / .5); }
-  .toast.leaving{ animation: toastOut .25s ease-in forwards;}
-  @keyframes toastIn{ from{ opacity:0; transform: translateY(-6px) scale(.98);} to{ opacity:1; transform:none;} }
-  @keyframes toastOut{ to{ opacity:0; transform: translateY(-6px) scale(.98);} }
-
-  /* Country pill */
-  .pill{
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    background: hsl(var(--card-elevated)); border:1px solid hsl(var(--ring) / .5);
+    color: hsl(var(--foreground)); padding: .75rem 1.25rem; border-radius: 999px;
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,.7), 0 0 0 1px hsl(var(--ring) / .25);
+    font-size: 13px; opacity: 0; transition: opacity .2s ease;
+    pointer-events:none;
     display:flex; align-items:center; gap:.5rem;
-    border:1px solid hsl(var(--border));
-    background: hsl(var(--card-elevated));
-    border-radius: 9999px; padding:.45rem .75rem .45rem .55rem;
-    transition: border-color .15s, background .15s, transform .12s;
-    cursor:pointer; text-align:left; min-width:0;
+    z-index: 50;
   }
-  .pill:hover{ border-color: hsl(var(--ring) / .35); background: hsl(var(--muted) / .4); transform: translateY(-1px);}
-  .pill .pflag{ font-size: 18px; line-height:1; flex-shrink:0;}
-  .pill .pname{ font-size: 13px; font-weight:500; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .pill .pdot{ width:6px; height:6px; border-radius:50%; background: hsl(var(--success)); flex-shrink:0; box-shadow: 0 0 0 2px hsl(var(--success) / .2);}
+  .toast.show{ opacity: 1; }
 
-  /* Glowing field tokens (data provenance chips) */
-  .glow-token{
-    color: hsl(var(--foreground));
-    text-shadow:
-      0 0 4px hsl(var(--ring) / .55),
-      0 0 10px hsl(var(--ring) / .35),
-      0 0 18px hsl(var(--ring) / .22);
-    animation: glowPulse 3.4s ease-in-out infinite;
+  /* Modal */
+  .modal-overlay{
+    position: fixed; inset: 0; background: rgba(0,0,0,.72);
+    z-index: 40; opacity: 0; pointer-events:none; transition: opacity .2s ease;
+    backdrop-filter: blur(4px);
+    display:flex; align-items:center; justify-content:center;
+    padding: 1rem;
   }
-  @keyframes glowPulse {
-    0%,100%{ text-shadow: 0 0 4px hsl(var(--ring) / .55), 0 0 10px hsl(var(--ring) / .35), 0 0 18px hsl(var(--ring) / .22);}
-    50%   { text-shadow: 0 0 6px hsl(var(--ring) / .85), 0 0 14px hsl(var(--ring) / .55), 0 0 24px hsl(var(--ring) / .35);}
+  .modal-overlay.show{ opacity: 1; pointer-events: auto; }
+  .modal{
+    background: hsl(var(--card)); border: 1px solid hsl(var(--border));
+    border-radius: 12px;
+    width: 100%; max-width: 760px; max-height: 90vh;
+    display:flex; flex-direction:column;
+    transform: translateY(8px) scale(.985); opacity: 0;
+    transition: transform .25s cubic-bezier(.2,.7,.2,1), opacity .2s ease;
+    box-shadow: 0 40px 80px -20px rgba(0,0,0,.7);
   }
-
-  /* Hint button — larger, glowing pulse to attract attention */
-  .hint-link{
-    font-size: 14px; font-weight: 500;
-    padding: .65rem 1.1rem;
-    border-color: hsl(var(--ring) / .45);
-    box-shadow: 0 0 0 1px hsl(var(--ring) / .15), 0 0 24px -6px hsl(var(--ring) / .35);
-    animation: hintPulse 2.6s ease-in-out infinite;
-  }
-  .hint-link:hover{
-    background: hsl(var(--muted) / .5);
-    border-color: hsl(var(--ring) / .8);
-  }
-  @keyframes hintPulse {
-    0%,100%{ box-shadow: 0 0 0 1px hsl(var(--ring) / .15), 0 0 18px -6px hsl(var(--ring) / .35);}
-    50%   { box-shadow: 0 0 0 1px hsl(var(--ring) / .35), 0 0 32px -6px hsl(var(--ring) / .65);}
-  }
-
-  .pop{ animation: pop .25s ease-out;}
-  @keyframes pop{ from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;} }
+  .modal-overlay.show .modal{ transform: none; opacity: 1; }
 </style>
 </head>
 <body class="min-h-screen">
 
-  <main class="max-w-5xl mx-auto px-6 pt-10 sm:pt-16 pb-24">
+  <!-- Header -->
+  <header class="header-bar">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 py-3 flex items-center gap-4">
+      <a href="#" class="serif text-2xl leading-none no-underline" style="text-decoration:none;">Continued<span class="italic">x</span></a>
+      <span class="mono text-[10px] tracking-widest uppercase text-[var(--mute)] hidden sm:inline">Rocketship Marketplace</span>
 
-    <!-- Header (minimal) -->
-    <div class="flex items-baseline justify-between mb-8">
-      <div class="serif text-2xl">Continued<span class="italic">x</span></div>
-    </div>
-
-    <div id="banner" class="hidden mb-6 border border-[var(--line-2)] p-4 text-sm flex items-center justify-between gap-4"></div>
-
-    <!-- ── FLASHCARD ── -->
-    <div id="cardWrap" class="card-wrap" data-state="idle">
-    <div id="card" class="card" role="button" tabindex="0" aria-label="Flashcard">
-
-      <!-- FRONT FACE (idle prompt + asking question) -->
-      <div class="face face-front">
-        <span class="punch" aria-hidden="true"></span>
-        <div class="corner"><span id="launchIdx">001</span></div>
-
-        <!-- IDLE: prompt -->
-        <div class="front-idle items-center text-center">
-          <div class="mono text-[11px] tracking-[0.2em] uppercase text-[var(--mute)]" id="questionTag">Question</div>
-
-          <div class="flex-1 flex flex-col items-center justify-center w-full">
-            <h1 id="questionPromptIdle" class="serif text-3xl sm:text-5xl font-medium leading-[1.1] tracking-tight mx-auto max-w-[28ch]">
-              <span class="skel inline-block h-9 w-56 align-middle"></span>
-            </h1>
-            <div id="questionMetaIdle" class="mt-8 flex flex-wrap items-start justify-center gap-x-12 gap-y-3"></div>
-          </div>
-
-          <div class="mono text-[10px] tracking-[0.22em] uppercase text-[#666]">Tap card to answer →</div>
-        </div>
-
-        <!-- ASKING: multiple choice -->
-        <div class="front-asking items-center text-center">
-          <div class="mono text-[11px] tracking-[0.2em] uppercase text-[var(--mute)]">Question</div>
-
-          <div class="flex-1 flex flex-col items-center justify-center w-full gap-6">
-            <div>
-              <h2 id="questionPromptAsk" class="serif text-2xl sm:text-3xl leading-tight max-w-[28ch] mx-auto">—</h2>
-              <div id="questionMetaAsk" class="mono text-[11px] text-[var(--mute)] mt-1">—</div>
-            </div>
-            <div id="options" class="flex flex-col gap-2.5 w-full max-w-md">
-              <div class="skel h-12"></div>
-              <div class="skel h-12"></div>
-              <div class="skel h-12"></div>
-              <div class="skel h-12"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- BACK FACE (the reveal) -->
-      <div class="face face-back items-center text-center">
-        <span class="punch" aria-hidden="true"></span>
-        <div class="corner"><span id="verdict">Answer</span></div>
-
-        <div class="flex-1 flex flex-col items-center justify-center w-full gap-4">
-          <div class="flex items-center gap-4">
-            <span id="flag" class="text-5xl leading-none">🏳️</span>
-            <h2 id="revealCountry" class="serif text-4xl sm:text-5xl font-medium leading-none tracking-tight">—</h2>
-          </div>
-          <div class="mono text-[12px] text-[var(--mute)]" id="revealFrom">—</div>
-          <dl class="mt-4 grid grid-cols-3 gap-x-8 gap-y-2 text-base w-full max-w-xl justify-items-center text-center">
-            <div>
-              <dt class="mono text-[10px] uppercase tracking-widest text-[var(--mute)]">Capital</dt>
-              <dd class="mt-1" id="revealCapital">—</dd>
-            </div>
-            <div>
-              <dt class="mono text-[10px] uppercase tracking-widest text-[var(--mute)]">Continent</dt>
-              <dd class="mt-1" id="revealContinent">—</dd>
-            </div>
-            <div>
-              <dt class="mono text-[10px] uppercase tracking-widest text-[var(--mute)]">Currency</dt>
-              <dd class="mt-1 mono" id="revealCurrency">—</dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-    </div>
-    </div>
-
-    <!-- Card actions -->
-    <div class="mt-4 flex items-center justify-between gap-2 flex-wrap">
-      <a href="#atlas" class="btn btn-outline inline-flex items-center gap-2 hint-link" id="hintLink">
+      <button id="openCart" class="btn btn-ghost inline-flex items-center gap-2 ml-auto">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 2v10M4 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 2h2l1.6 8.5a1 1 0 0 0 1 .8h6.5a1 1 0 0 0 .98-.78L15.5 5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="6.5" cy="14" r="1" fill="currentColor"/>
+          <circle cx="12" cy="14" r="1" fill="currentColor"/>
         </svg>
-        Click me for a hint
-      </a>
-      <div class="flex items-center gap-2">
-        <button id="skipBtn" class="btn btn-ghost">Skip</button>
-        <button id="nextBtn" class="btn hidden">Next →</button>
-      </div>
+        <span>Cart</span>
+        <span id="cartCount" class="mono text-[11px] px-1.5 py-0.5 rounded-full" style="background: hsl(var(--accent)); color:#000;">0</span>
+      </button>
     </div>
+  </header>
 
-    <!-- GraphQL traversal used to build the current question -->
-    <div class="mt-3 mono text-[11px] tracking-wider uppercase text-[var(--mute)] hidden items-center gap-2">
-      <span class="opacity-60">graphql</span>
-      <span class="glow-token" id="queryLabel">—</span>
-    </div>
+  <main class="max-w-7xl mx-auto px-5 sm:px-8 pt-8 pb-24">
 
-    <!-- Data attribution under the flashcard -->
-    <div class="mt-8 flex flex-col gap-3">
-      <div class="rounded-lg border px-4 py-3 flex items-center gap-4 flex-wrap" style="border-color: hsl(var(--border)); background: hsl(var(--card-elevated));">
-        <span class="mono text-[10px] tracking-widest uppercase text-[var(--mute)]">01</span>
-        <div class="text-sm font-medium whitespace-nowrap text-yellow-300" style="text-shadow: 0 0 12px rgba(253,224,71,.35);">All missions are pulled from the SpaceX GraphQL API.</div>
-        <div class="mono text-[11px] flex flex-wrap gap-x-3 gap-y-0.5 ml-auto">
-          <span class="glow-token">launchesPast</span><span class="glow-token">missions</span><span class="glow-token">rocket</span><span class="glow-token">site</span><span class="glow-token">country</span>
-        </div>
-      </div>
-      <div class="rounded-lg border px-4 py-3 flex items-center gap-4 flex-wrap" style="border-color: hsl(var(--border)); background: hsl(var(--card-elevated));">
-        <span class="mono text-[10px] tracking-widest uppercase text-[var(--mute)]">02</span>
-        <div class="text-sm font-medium whitespace-nowrap text-yellow-300" style="text-shadow: 0 0 12px rgba(253,224,71,.35);">All country data is pulled from the Countries GraphQL API.</div>
-        <div class="mono text-[11px] flex flex-wrap gap-x-3 gap-y-0.5 ml-auto">
-          <span class="glow-token">country</span><span class="glow-token">flag</span><span class="glow-token">capital</span><span class="glow-token">continent</span><span class="glow-token">currency</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Scroll hint — pushes hints below the fold -->
-    <div class="mt-[28vh] flex flex-col items-center gap-2 text-[var(--mute)]">
-      <div class="mono text-[10px] tracking-[0.22em] uppercase">Scroll for hints</div>
-      <svg width="14" height="20" viewBox="0 0 14 20" fill="none" aria-hidden="true">
-        <path d="M7 2v14M2 11l5 5 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-
-    <!-- ── HINTS (5×5 country pills) ── -->
-    <section class="mt-16" id="atlas">
-      <div class="flex items-baseline justify-between mb-2">
-        <h2 class="serif text-3xl">Need a hint?</h2>
+    <section>
+      <div class="flex items-baseline justify-between gap-4 flex-wrap mb-5">
+        <h1 class="serif text-3xl">Rocketships</h1>
         <div class="mono text-[11px] tracking-widest uppercase text-[var(--mute)]">
-          <span id="atlasShown">25</span> of <span id="atlasTotal">—</span>
+          <span id="resultCount">—</span> in stock · prices in local currency
         </div>
       </div>
-      <p class="text-sm text-[var(--mute)] mb-5 max-w-prose">If you don't know the answer, click on a country below for a hint — you'll see its flag, capital, continent, currency, and any SpaceX launches from there.</p>
-      <div id="atlas-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2"></div>
-      <div class="mt-4 flex justify-center">
-        <button id="atlasShuffle" class="btn btn-outline text-xs">Shuffle sample</button>
+
+      <div id="banner" class="hidden mb-6 rounded-lg border p-4 text-sm flex items-center justify-between gap-4" style="border-color: hsl(var(--border)); background: hsl(var(--card-elevated));"></div>
+
+      <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div class="product"><div class="product-img skel rounded-none"></div><div class="p-4 space-y-2"><div class="skel h-4 w-3/4"></div><div class="skel h-3 w-1/2"></div><div class="skel h-8 w-1/3 mt-2"></div><div class="skel h-9 w-full mt-2"></div></div></div>
+        <div class="product"><div class="product-img skel rounded-none"></div><div class="p-4 space-y-2"><div class="skel h-4 w-3/4"></div><div class="skel h-3 w-1/2"></div><div class="skel h-8 w-1/3 mt-2"></div><div class="skel h-9 w-full mt-2"></div></div></div>
+        <div class="product"><div class="product-img skel rounded-none"></div><div class="p-4 space-y-2"><div class="skel h-4 w-3/4"></div><div class="skel h-3 w-1/2"></div><div class="skel h-8 w-1/3 mt-2"></div><div class="skel h-9 w-full mt-2"></div></div></div>
+        <div class="product"><div class="product-img skel rounded-none"></div><div class="p-4 space-y-2"><div class="skel h-4 w-3/4"></div><div class="skel h-3 w-1/2"></div><div class="skel h-8 w-1/3 mt-2"></div><div class="skel h-9 w-full mt-2"></div></div></div>
       </div>
+
+      <div id="empty" class="hidden py-16 mono text-[11px] tracking-widest uppercase text-[var(--mute)] text-center">No rockets in stock.</div>
     </section>
 
+    <!-- Data sources strip (below the catalog) -->
+    <div class="rounded-xl border px-5 py-4 mt-10 space-y-2" style="border-color: hsl(var(--border)); background: hsl(var(--card-elevated));">
+      <div class="mono text-[10px] tracking-widest uppercase text-[var(--mute)]">Data sources</div>
+      <div>
+        <span class="text-sm font-medium text-yellow-300" style="text-shadow: 0 0 12px rgba(253,224,71,.35);">Rocket inventory from the SpaceX GraphQL API</span>
+        <span class="mono text-[11px] text-[var(--mute)] ml-2">rockets · launches · country</span>
+      </div>
+      <div>
+        <span class="text-sm font-medium text-yellow-300" style="text-shadow: 0 0 12px rgba(253,224,71,.35);">Local pricing from the Countries GraphQL API</span>
+        <span class="mono text-[11px] text-[var(--mute)] ml-2">flag · capital · continent · currency</span>
+      </div>
+    </div>
+
     <footer class="mt-20 mono text-[10px] tracking-widest uppercase text-[var(--mute)] flex gap-x-6 gap-y-1 flex-wrap">
-      <span>SpaceX GraphQL</span><span>Countries · Trevor Blades</span>
+      <span>SpaceX · rockets + launches</span>
+      <span>Countries · Trevor Blades</span>
     </footer>
   </main>
 
-  <!-- Toast region -->
-  <div id="toasts" class="toast-region" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- Country dialog -->
-  <div id="dialog" class="hidden fixed inset-0 z-40">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" data-dialog-close></div>
-    <div class="relative z-10 max-w-lg mx-auto mt-[10vh] mx-4 sm:mx-auto rounded-xl p-6" style="background: hsl(var(--card)); border:1px solid hsl(var(--border)); box-shadow: 0 25px 60px -20px rgba(0,0,0,.7);">
-      <button class="absolute top-3 right-3 btn btn-ghost text-xs" data-dialog-close>Esc</button>
-      <div class="flex items-center gap-4">
-        <span id="dlgFlag" class="text-5xl leading-none">🏳️</span>
-        <div class="min-w-0">
-          <div class="serif text-3xl leading-tight truncate" id="dlgName">—</div>
-          <div class="mono text-[11px] text-[var(--mute)] tracking-widest uppercase mt-1" id="dlgSubtitle">—</div>
-        </div>
-      </div>
-      <dl class="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-        <div>
-          <dt class="mono text-[10px] uppercase tracking-widest text-[var(--mute)]">Capital</dt>
-          <dd class="mt-1" id="dlgCapital">—</dd>
-        </div>
-        <div>
-          <dt class="mono text-[10px] uppercase tracking-widest text-[var(--mute)]">Continent</dt>
-          <dd class="mt-1" id="dlgContinent">—</dd>
-        </div>
-        <div>
-          <dt class="mono text-[10px] uppercase tracking-widest text-[var(--mute)]">Currency</dt>
-          <dd class="mt-1 mono" id="dlgCurrency">—</dd>
-        </div>
-        <div>
-          <dt class="mono text-[10px] uppercase tracking-widest text-[var(--mute)]">Languages</dt>
-          <dd class="mt-1" id="dlgLanguages">—</dd>
-        </div>
-      </dl>
-      <div id="dlgLaunchBlock" class="mt-6 pt-4 border-t hidden" style="border-color: hsl(var(--border));">
-        <div class="mono text-[10px] uppercase tracking-widest text-[var(--mute)] mb-2">SpaceX launches from here</div>
-        <div id="dlgLaunchList" class="text-sm"></div>
-      </div>
+  <!-- Detail modal -->
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header class="px-6 py-4 border-b flex items-center justify-between gap-3" style="border-color: hsl(var(--border));">
+        <div class="mono text-[10px] tracking-widest uppercase text-[var(--mute)]">Rocket detail</div>
+        <button id="closeModal" class="btn btn-ghost text-xs">Close ✕</button>
+      </header>
+      <div id="modalBody" class="flex-1 overflow-y-auto p-6"></div>
     </div>
   </div>
 
-<script type="module" src="./js/main.js"></script>
+  <!-- Toast -->
+  <div id="toast" class="toast"><span>Added</span></div>
+
+  <!-- Rocket SVG sprite (illustrations, tinted via currentColor) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="rk-classic" viewBox="0 0 120 200">
+        <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+          <path d="M60 8c-12 18-18 40-18 70v76H78V78c0-30-6-52-18-70Z"/>
+          <path d="M42 154 30 184l12-6 18 6 18-6 12 6-12-30"/>
+          <circle cx="60" cy="62" r="8"/>
+          <path d="M42 110h36M42 130h36"/>
+        </g>
+      </symbol>
+      <symbol id="rk-heavy" viewBox="0 0 160 200">
+        <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+          <path d="M80 8c-10 16-14 36-14 60v92H94V68c0-24-4-44-14-60Z"/>
+          <path d="M40 40c-6 12-8 28-8 50v62h22V92c0-22 2-38 6-52"/>
+          <path d="M120 40c6 12 8 28 8 50v62h-22V92c0-22-2-38-6-52"/>
+          <path d="M66 154 56 184l10-4 14 4 14-4 10 4-10-30"/>
+          <circle cx="80" cy="56" r="7"/>
+          <path d="M66 100h28M66 120h28"/>
+        </g>
+      </symbol>
+      <symbol id="rk-starship" viewBox="0 0 120 220">
+        <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+          <path d="M60 6c-14 14-22 36-22 70v100H82V76c0-34-8-56-22-70Z"/>
+          <path d="M38 156c-10 8-16 18-18 30l40-12 40 12c-2-12-8-22-18-30"/>
+          <path d="M40 60h40M40 100h40M40 140h40"/>
+          <circle cx="60" cy="36" r="6"/>
+        </g>
+      </symbol>
+      <symbol id="rk-mini" viewBox="0 0 100 200">
+        <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+          <path d="M50 12c-9 14-14 32-14 56v94h28V68c0-24-5-42-14-56Z"/>
+          <path d="M36 162 26 188l10-4 14 4 14-4 10 4-10-26"/>
+          <circle cx="50" cy="56" r="6"/>
+          <path d="M36 100h28"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <script type="module" src="./js/main.js"></script>
 </body>
 </html>

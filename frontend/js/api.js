@@ -1,27 +1,32 @@
-// GraphQL client. Every upstream call now goes through Vercel serverless
+// GraphQL client. Every upstream call goes through Vercel serverless
 // proxies at /api/spacex and /api/countries — same-origin, no CORS surprises
 // in prod, and uniform error handling for tests.
 
 const SPACEX_PROXY = '/api/spacex';
 const COUNTRIES_PROXY = '/api/countries';
 
-export const SPACEX_QUERY = `query L($limit:Int!){launchesPast(limit:$limit, sort:"launch_date_utc", order:"desc"){
-  mission_name launch_date_utc details
-  launch_site{ site_name site_name_long }
-  rocket{ rocket_name rocket{ country } }
-}}`;
+export const ROCKETS_QUERY = `query{
+  rockets{
+    id name description active country company
+    cost_per_launch success_rate_pct first_flight
+    stages boosters
+    mass{ kg } height{ meters } diameter{ meters }
+  }
+}`;
 
-export const COUNTRIES_QUERY = `query{countries{ code name emoji capital currency continent{name} languages{name} }}`;
+export const LAUNCHES_QUERY = `query{
+  launchesPast(limit:200, sort:"launch_date_utc", order:"desc"){
+    mission_name launch_date_utc launch_success
+    launch_site{ site_name_long }
+    rocket{ rocket_name }
+  }
+}`;
 
-export const COUNTRY_QUERY = `query($code:ID!){country(code:$code){ code name emoji capital currency continent{name} languages{name} }}`;
+export const COUNTRIES_QUERY = `query{ countries{ code name emoji capital currency continent{name} } }`;
 
-// Continent → countries → currency chain — exactly the schema traversal used
-// by the "which country in <continent> uses <currency>" question type.
-export const CONTINENTS_QUERY = `query{continents{ code name countries{ code name emoji capital currency } }}`;
+export const COUNTRY_QUERY = `query($code:ID!){ country(code:$code){ code name emoji capital currency continent{name} languages{name} } }`;
 
-export const CONTINENT_QUERY = `query($code:ID!){continent(code:$code){ code name countries{ code name emoji capital currency } }}`;
-
-async function gqlFetch(url, query, variables = {}, timeoutMs = 9000) {
+async function gqlFetch(url, query, variables = {}, timeoutMs = 10000) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
