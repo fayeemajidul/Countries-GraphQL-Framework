@@ -77,4 +77,40 @@
 
 ### 18
 
-> I want the questions to test the graphql endpoints so create some questions related to querying certain information from specific countries , for example ask the user specific questions related to  currency inorder to get the answer we can Query Continents -> countires -> currency randomize questions but user graphql to pull all information
+> Make sure this repository has the correct dependancies to be able to run GRAPHQL Queries, I want to be able to run, I have given you MCP access with my connectors, I want you to reference tools that are useful to you in this session to flesh out the depancies I will need to run GraphQl as this is a new machine, make sure the steps that you implement can also be used if someone were to download this repository. Lets actually create a shell scripts as well to ease with set up, leave the automation testing with GraphQL task to me you handle the set up and initilization
+
+### 19
+
+> disconnect your thought process from referencing Jira we are not using that anymore, its a nice to have feature
+
+### 20
+
+> Why are we using playwright??? Thats not what I mentioned in my prompt I said graphql
+
+### 21
+
+> And just the dependancies not boilerplate code
+
+### 22
+
+> Draft a Scenario_Startegy, we are going to create two scenarios by strategy, strategy here is to understand the key critical areas, for a customer the Best Seller sectionh as the highest success rate from SpaceX and also the region will always be United States since that is where most of Rocketships are puchased in the world the goal is to create a test script that validates the end points query to fetch that we are getting those values
+
+### 23
+
+> Lets keep all Backend structure related to the hosted website in a Backend folder so it is cleanly divided into Frontend Backend and Tests
+
+### 24
+
+> Fix my .MD file structure for scenario_strategy.md
+
+### 25
+
+> dont make any correction or revisions other than formatting
+
+### 26
+
+> instead of having the Scenario_Strategy in Asessment-claude-prompts lets have it in Tests, as thi sis a strategy to have in tests and makes sense
+
+### 27
+
+> update my chat history in chat transcript .md too we havent updated it

@@ -13,7 +13,7 @@ Question shown to the user: *"From which country did <mission> lift off?"* — f
 
 ## Run it
 
-The frontend talks to `/api/spacex` and `/api/countries` (serverless proxies in `../api/`), so run both layers together:
+The frontend talks to `/api/spacex` and `/api/countries` (serverless proxies in `../backend/api/`, with Vercel shims at `../api/`), so run both layers together:
 
 ```bash
 # from the repo root
