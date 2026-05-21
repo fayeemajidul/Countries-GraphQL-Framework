@@ -1,14 +1,14 @@
 // Local dev server: serves /frontend statically and routes /api/* to the
-// Vercel-style handlers under /api. One process, one port — mirrors prod.
+// Vercel-style handlers under /backend/api. One process, one port — mirrors prod.
 
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(fileURLToPath(import.meta.url), '..', '..');
+const ROOT = resolve(fileURLToPath(import.meta.url), '..', '..', '..');
 const FRONTEND_DIR = join(ROOT, 'frontend');
-const API_DIR = join(ROOT, 'api');
+const API_DIR = join(ROOT, 'backend', 'api');
 const PORT = Number(process.env.PORT) || 3000;
 
 const MIME = {
